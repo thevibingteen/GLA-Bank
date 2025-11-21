@@ -31,7 +31,7 @@ export default function AdminPage() {
                 <Download className="h-4 w-4" />
                 Export audit log
               </Button>
-              <Button className="gap-2 bg-gradient-to-r from-slate-900 to-blue-700 text-white">
+              <Button className="gap-2 bg-gradient-to-r from-green-700 to-emerald-700 text-white">
                 <ShieldCheck className="h-4 w-4" />
                 Security view
               </Button>
@@ -131,7 +131,13 @@ export default function AdminPage() {
                                     size="sm"
                                     variant="outline"
                                     className="gap-1 text-green-600 hover:bg-green-50 dark:hover:bg-emerald-500/10"
-                                    onClick={() => approveTransaction(transaction.id)}
+                                    onClick={async () => {
+                                      try {
+                                        await approveTransaction(transaction.id || transaction._id || '');
+                                      } catch (err: any) {
+                                        console.error('Failed to approve transaction:', err);
+                                      }
+                                    }}
                                   >
                                     <CheckCircle className="h-4 w-4" />
                                     Approve
@@ -140,7 +146,13 @@ export default function AdminPage() {
                                     size="sm"
                                     variant="outline"
                                     className="gap-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"
-                                    onClick={() => rejectTransaction(transaction.id)}
+                                    onClick={async () => {
+                                      try {
+                                        await rejectTransaction(transaction.id || transaction._id || '');
+                                      } catch (err: any) {
+                                        console.error('Failed to reject transaction:', err);
+                                      }
+                                    }}
                                   >
                                     <XCircle className="h-4 w-4" />
                                     Reject

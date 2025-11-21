@@ -4,14 +4,16 @@ import { useBank } from '@/contexts/BankContext';
 import Sidebar from '@/components/dashboard/Sidebar';
 import AccountCard from '@/components/dashboard/AccountCard';
 import TransactionList from '@/components/dashboard/TransactionList';
-import QuickActions from '@/components/dashboard/QuickActions';
 import TransferDialog from '@/components/dashboard/TransferDialog';
-import { Bell, CreditCard, ShieldCheck, Wallet, Clock, AlertTriangle, ArrowRightLeft } from 'lucide-react';
+import { Bell, CreditCard, ShieldCheck, Wallet, Clock, ArrowRightLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { formatCurrency } from '@/lib/utils';
+import Logo from '@/components/ui/Logo';
+import { motion } from 'framer-motion';
+import AnimatedNumber from '@/components/ui/AnimatedNumber';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -27,37 +29,48 @@ export default function DashboardPage() {
   const approvedTransfers = transactions.filter(t => t.status === 'approved');
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-background dark:bg-background">
       <Sidebar />
       
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white border-b px-6 py-4">
+        <header className="bg-card dark:bg-card border-b px-6 py-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Good day, {user?.name}</p>
-              <h1 className="text-2xl font-bold">Your personal banking hub</h1>
-              <p className="text-sm text-muted-foreground">Track balances, transfers, and alerts in one place.</p>
+            <div className="flex items-center gap-4">
+              <Logo size="sm" showText={false} />
+              <div>
+                <p className="text-sm text-muted-foreground">Good day, {user?.name}</p>
+                <h1 className="text-2xl font-bold">Your personal banking hub</h1>
+                <p className="text-sm text-muted-foreground">Track balances, transfers, and alerts in one place.</p>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" className="gap-2">
                 <Bell className="h-4 w-4" />
                 Notifications
               </Button>
-              <Button className="gap-2 bg-gradient-to-r from-blue-600 to-green-600">
-                <Wallet className="h-4 w-4" />
-                Add funds
-              </Button>
             </div>
           </div>
         </header>
 
         <main className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-7xl mx-auto space-y-8">
+          <motion.div 
+            className="max-w-7xl mx-auto space-y-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
             <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
-              <Card className="bg-gradient-to-br from-blue-600 via-blue-500 to-emerald-500 text-white border-none shadow-xl">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+              >
+              <Card className="bg-gradient-to-br from-green-700 via-green-600 to-emerald-500 text-white border-none shadow-xl">
                 <CardHeader className="flex flex-col gap-1">
                   <CardDescription className="text-white/70">Total Available Balance</CardDescription>
-                  <CardTitle className="text-4xl font-bold">{formatCurrency(totalBalance)}</CardTitle>
+                  <CardTitle className="text-4xl font-bold">
+                    <AnimatedNumber value={totalBalance} prefix="$" decimals={2} />
+                  </CardTitle>
                   <p className="text-sm text-white/80">
                     Across {accounts.length} account{accounts.length === 1 ? '' : 's'} · {pendingTransactions.length} transfer
                     {pendingTransactions.length === 1 ? '' : 's'} pending
@@ -72,7 +85,7 @@ export default function DashboardPage() {
                     <TransferDialog
                       type="send"
                       trigger={
-                        <Button className="bg-white text-blue-600 hover:bg-white/90 gap-2">
+                        <Button className="bg-white text-green-700 hover:bg-white/90 gap-2">
                           <ArrowRightLeft className="h-4 w-4" />
                           Quick transfer
                         </Button>
@@ -90,7 +103,13 @@ export default function DashboardPage() {
                   </div>
                 </CardContent>
               </Card>
+              </motion.div>
 
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
+              >
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
@@ -119,13 +138,19 @@ export default function DashboardPage() {
                   </Button>
                 </CardContent>
               </Card>
+              </motion.div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-3 gap-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+            >
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium">Active accounts</CardTitle>
-                  <CreditCard className="h-4 w-4 text-blue-600" />
+                  <CreditCard className="h-4 w-4 text-green-700" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{accounts.length}</div>
@@ -152,9 +177,14 @@ export default function DashboardPage() {
                   <p className="text-xs text-muted-foreground mt-1">Awaiting admin review</p>
                 </CardContent>
               </Card>
-            </div>
+            </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-2 gap-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.4 }}
+            >
               <Card>
                 <CardHeader>
                   <CardTitle>Cash accounts</CardTitle>
@@ -175,37 +205,14 @@ export default function DashboardPage() {
                   </Button>
                 </CardContent>
               </Card>
+            </motion.div>
 
-              {pendingTransactions.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <AlertTriangle className="h-4 w-4 text-amber-500" />
-                      Transfers awaiting approval
-                    </CardTitle>
-                    <CardDescription>Keep things moving by reviewing pending requests.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {pendingTransactions.slice(0, 3).map((transaction) => (
-                      <div key={transaction.id} className="rounded-lg border p-3">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="font-medium">{transaction.description}</span>
-                          <span className="font-semibold">{formatCurrency(transaction.amount)}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          From #{transaction.fromAccount} to #{transaction.toAccount}
-                        </p>
-                      </div>
-                    ))}
-                    <Button variant="outline" className="w-full" onClick={() => navigate('/admin')}>
-                      Review in Admin
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.5 }}
+            >
               {accounts.map((account) => (
                 <AccountCard 
                   key={account.id}
@@ -215,12 +222,10 @@ export default function DashboardPage() {
                   type={account.type} 
                 />
               ))}
-            </div>
-
-            <QuickActions />
+            </motion.div>
 
             <TransactionList />
-          </div>
+          </motion.div>
         </main>
       </div>
     </div>

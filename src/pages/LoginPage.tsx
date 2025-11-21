@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
+import Logo from '@/components/ui/Logo';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -30,11 +31,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="space-y-1 text-center">
-          <div className="mx-auto w-12 h-12 bg-gradient-to-br from-blue-600 to-green-600 rounded-full flex items-center justify-center mb-4">
-            <Lock className="w-6 h-6 text-white" />
+          <div className="mx-auto mb-4">
+            <Logo size="lg" />
           </div>
           <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
           <CardDescription>Sign in to your banking account</CardDescription>
@@ -86,7 +87,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700" disabled={loading}>
+            <Button type="submit" className="w-full bg-gradient-to-r from-green-700 to-emerald-600 hover:from-green-800 hover:to-emerald-700" disabled={loading}>
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>
           </CardContent>
@@ -94,7 +95,7 @@ export default function LoginPage() {
         <CardFooter className="flex flex-col space-y-2">
           <div className="text-sm text-center text-muted-foreground">
             Don't have an account?{' '}
-            <a href="/register" className="text-blue-600 hover:underline font-medium">
+            <a href="/register" className="text-green-700 hover:underline font-medium">
               Sign up
             </a>
           </div>

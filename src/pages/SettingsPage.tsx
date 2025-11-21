@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Bell, User, Lock, CreditCard, Globe, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import Logo from '@/components/ui/Logo';
 
 export default function SettingsPage() {
   const { user } = useAuth();

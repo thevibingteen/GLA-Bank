@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useBank } from '@/contexts/BankContext';
 import Sidebar from '@/components/dashboard/Sidebar';
 import PageHeader from '@/components/dashboard/PageHeader';
@@ -7,15 +8,26 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowRightLeft, PiggyBank, Wallet, ArrowDownRight, PlusCircle } from 'lucide-react';
 import TransferDialog from '@/components/dashboard/TransferDialog';
 import { formatCurrency } from '@/lib/utils';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/components/ui/use-toast';
+import Logo from '@/components/ui/Logo';
 
 export default function AccountsPage() {
-  const { accounts } = useBank();
+  const { accounts, addAccount } = useBank();
+  const [open, setOpen] = useState(false);
+  const [accountName, setAccountName] = useState('');
+  const [accountType, setAccountType] = useState<'checking' | 'savings' | 'credit'>('checking');
+  const [initialBalance, setInitialBalance] = useState('');
+  const { toast } = useToast();
 
   const getTypeColor = (type: string) => {
     const colors = {
-      checking: 'from-blue-500 to-blue-600',
-      savings: 'from-green-500 to-green-600',
-      credit: 'from-purple-500 to-purple-600',
+      checking: 'from-green-600 to-green-700',
+      savings: 'from-emerald-500 to-emerald-600',
+      credit: 'from-green-700 to-emerald-700',
     };
     return colors[type as keyof typeof colors] ?? 'from-slate-500 to-slate-600';
   };
@@ -43,10 +55,98 @@ export default function AccountsPage() {
                   </Button>
                 }
               />
-              <Button className="gap-2 bg-gradient-to-r from-blue-600 to-emerald-500">
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+              <Button className="gap-2 bg-gradient-to-r from-green-700 to-emerald-600">
                 <PlusCircle className="h-4 w-4" />
                 Add account
               </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add New Account</DialogTitle>
+                    <DialogDescription>
+                      Create a new checking, savings, or credit account.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="name">Account Name</Label>
+                      <Input
+                        id="name"
+                        placeholder="e.g., My Savings Account"
+                        value={accountName}
+                        onChange={(e) => setAccountName(e.target.value)}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="type">Account Type</Label>
+                      <Select value={accountType} onValueChange={(value: 'checking' | 'savings' | 'credit') => setAccountType(value)}>
+                        <SelectTrigger id="type">
+                          <SelectValue placeholder="Select account type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="checking">Checking</SelectItem>
+                          <SelectItem value="savings">Savings</SelectItem>
+                          <SelectItem value="credit">Credit</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="balance">Initial Balance (optional)</Label>
+                      <Input
+                        id="balance"
+                        type="number"
+                        placeholder="0.00"
+                        value={initialBalance}
+                        onChange={(e) => setInitialBalance(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        if (!accountName.trim()) {
+                          toast({
+                            title: "Error",
+                            description: "Please enter an account name",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+                        (async () => {
+                          try {
+                            await addAccount(
+                              accountName,
+                              accountType,
+                              initialBalance ? parseFloat(initialBalance) : 0
+                            );
+                            setAccountName('');
+                            setAccountType('checking');
+                            setInitialBalance('');
+                            setOpen(false);
+                            toast({
+                              title: "Success",
+                              description: "Account created successfully",
+                            });
+                          } catch (err: any) {
+                            toast({
+                              title: "Error",
+                              description: err.message || 'Failed to create account',
+                              variant: "destructive",
+                            });
+                          }
+                        })();
+                      }}
+                    >
+                      Create Account
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </>
           }
         />
@@ -77,7 +177,7 @@ export default function AccountsPage() {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium">Net worth</CardTitle>
-                  <Wallet className="h-4 w-4 text-blue-600" />
+                  <Wallet className="h-4 w-4 text-green-700" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{formatCurrency(netWorth)}</div>
@@ -99,7 +199,7 @@ export default function AccountsPage() {
                     <p className="text-xs text-muted-foreground">{account.accountNumber}</p>
                     <p className="mt-3 text-sm font-medium">{formatCurrency(account.balance)}</p>
                     <div className="mt-2 h-1.5 rounded-full bg-muted">
-                      <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-emerald-500" style={{ width: '70%' }} />
+                      <div className="h-full rounded-full bg-gradient-to-r from-green-600 to-emerald-500" style={{ width: '70%' }} />
                     </div>
                   </div>
                 ))}

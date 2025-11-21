@@ -1,9 +1,11 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { authAPI, removeToken, setToken } from '@/lib/api';
 
 interface User {
   id: string;
   email: string;
   name: string;
+  role?: 'user' | 'admin';
 }
 
 interface AuthContextType {
@@ -12,45 +14,81 @@ interface AuthContextType {
   register: (email: string, password: string, name: string) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
+  isAdmin: boolean;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Check for existing session on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+          const response = await authAPI.getMe();
+          setUser({
+            id: response.user.id,
+            email: response.user.email,
+            name: response.user.name,
+            role: response.user.role
+          });
+        }
+      } catch (error) {
+        // Token invalid or expired
+        removeToken();
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    if (email && password.length >= 6) {
-      setUser({
-        id: '1',
-        email,
-        name: email.split('@')[0]
-      });
-      return true;
+    try {
+      const response = await authAPI.login(email, password);
+      if (response && response.user) {
+        setUser({
+          id: response.user.id || response.user._id?.toString() || '',
+          email: response.user.email,
+          name: response.user.name,
+          role: response.user.role || 'user'
+        });
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.error('Login error:', error);
+      return false;
     }
-    return false;
   };
 
   const register = async (email: string, password: string, name: string): Promise<boolean> => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    if (email && password.length >= 8 && name) {
-      setUser({
-        id: '1',
-        email,
-        name
-      });
-      return true;
+    try {
+      const response = await authAPI.register(email, password, name);
+      if (response && response.user) {
+        setUser({
+          id: response.user.id || response.user._id?.toString() || '',
+          email: response.user.email,
+          name: response.user.name,
+          role: response.user.role || 'user'
+        });
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.error('Register error:', error);
+      return false;
     }
-    return false;
   };
 
   const logout = () => {
     setUser(null);
+    removeToken();
   };
 
   return (
@@ -59,7 +97,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login, 
       register, 
       logout, 
-      isAuthenticated: !!user 
+      isAuthenticated: !!user,
+      isAdmin: user?.role === 'admin',
+      loading
     }}>
       {children}
     </AuthContext.Provider>

@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Eye, EyeOff, Lock, Mail, User, CheckCircle2, XCircle } from 'lucide-react';
+import Logo from '@/components/ui/Logo';
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -34,27 +35,39 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
 
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      setError('All fields are required');
+      return;
+    }
+
     if (!isStrongPassword) {
       setError('Please use a stronger password');
       return;
     }
 
     setLoading(true);
-    const success = await register(email, password, name);
-    
-    if (!success) {
-      setError('Registration failed. Please try again.');
+    try {
+      const success = await register(email, password, name);
+      
+      if (!success) {
+        setError('Registration failed. Please check your connection and try again.');
+      } else {
+        // Redirect will happen automatically via AuthContext
+        window.location.href = '/dashboard';
+      }
+    } catch (err: any) {
+      setError(err.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="space-y-1 text-center">
-          <div className="mx-auto w-12 h-12 bg-gradient-to-br from-blue-600 to-green-600 rounded-full flex items-center justify-center mb-4">
-            <User className="w-6 h-6 text-white" />
+          <div className="mx-auto mb-4">
+            <Logo size="lg" />
           </div>
           <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
           <CardDescription>Join us to manage your finances</CardDescription>
@@ -159,7 +172,7 @@ export default function RegisterPage() {
 
             <Button 
               type="submit" 
-              className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700" 
+              className="w-full bg-gradient-to-r from-green-700 to-emerald-600 hover:from-green-800 hover:to-emerald-700" 
               disabled={loading || !isStrongPassword}
             >
               {loading ? 'Creating Account...' : 'Create Account'}
@@ -169,7 +182,7 @@ export default function RegisterPage() {
         <CardFooter className="flex flex-col space-y-2">
           <div className="text-sm text-center text-muted-foreground">
             Already have an account?{' '}
-            <a href="/login" className="text-blue-600 hover:underline font-medium">
+            <a href="/login" className="text-green-700 hover:underline font-medium">
               Sign in
             </a>
           </div>

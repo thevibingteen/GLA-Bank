@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowUpDown, Filter, Inbox, Search } from 'lucide-react';
 import { useBank } from '@/contexts/BankContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Transaction {
   id: string;
@@ -46,7 +47,7 @@ export default function TransactionList() {
         description: txn.description || (txn.type === 'receive' ? 'Incoming transfer' : 'Transfer'),
         amount: txn.type === 'receive' ? txn.amount : -txn.amount,
         category: 'Transfer',
-        type: txn.type === 'receive' ? 'credit' : 'debit',
+        type: (txn.type === 'receive' ? 'credit' : 'debit') as 'credit' | 'debit',
         status: txn.status,
       })),
       ...staticTransactions.slice(0, 4),
@@ -85,7 +86,7 @@ export default function TransactionList() {
     const colors: Record<string, string> = {
       'Income': 'bg-green-100 text-green-800',
       'Food': 'bg-orange-100 text-orange-800',
-      'Utilities': 'bg-blue-100 text-blue-800',
+      'Utilities': 'bg-green-100 text-green-800',
       'Shopping': 'bg-purple-100 text-purple-800',
       'Transport': 'bg-yellow-100 text-yellow-800',
       'Health': 'bg-pink-100 text-pink-800',
@@ -202,49 +203,58 @@ export default function TransactionList() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredTransactions.map((transaction) => (
-                  <TableRow key={transaction.id} className="transition-colors hover:bg-muted/40">
-                    <TableCell className="font-medium">
-                      {new Date(transaction.date).toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric' 
-                      })}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span>{transaction.description}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {transaction.type === 'credit' ? 'Incoming transfer' : 'Card purchase'}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className={getCategoryColor(transaction.category)}>
-                        {transaction.category}
-                      </Badge>
-                    </TableCell>
-                <TableCell>
-                  <Badge
-                    variant={
-                      transaction.status === 'approved'
-                        ? 'default'
-                        : transaction.status === 'rejected'
-                        ? 'destructive'
-                        : 'secondary'
-                    }
-                    className="capitalize"
+                <AnimatePresence>
+                {filteredTransactions.map((transaction, index) => (
+                  <motion.tr
+                    key={transaction.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.2, delay: index * 0.05 }}
+                    className="border-b transition-colors hover:bg-muted/40"
                   >
-                    {transaction.status ?? (transaction.type === 'credit' ? 'settled' : 'posted')}
-                  </Badge>
-                </TableCell>
-                    <TableCell className={`text-right font-semibold ${
-                      transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                      {transaction.amount > 0 ? '+' : '-'}
-                      {inrFmt.format(Math.abs(transaction.amount))}
-                    </TableCell>
-                  </TableRow>
+                      <TableCell className="font-medium">
+                        {new Date(transaction.date).toLocaleDateString('en-US', { 
+                          month: 'short', 
+                          day: 'numeric' 
+                        })}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span>{transaction.description}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {transaction.type === 'credit' ? 'Incoming transfer' : 'Card purchase'}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className={getCategoryColor(transaction.category)}>
+                          {transaction.category}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            transaction.status === 'approved'
+                              ? 'default'
+                              : transaction.status === 'rejected'
+                              ? 'destructive'
+                              : 'secondary'
+                          }
+                          className="capitalize"
+                        >
+                          {transaction.status ?? (transaction.type === 'credit' ? 'settled' : 'posted')}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className={`text-right font-semibold ${
+                        transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {transaction.amount > 0 ? '+' : '-'}
+                        {inrFmt.format(Math.abs(transaction.amount))}
+                      </TableCell>
+                    </motion.tr>
                 ))}
+                </AnimatePresence>
               </TableBody>
             </Table>
           )}

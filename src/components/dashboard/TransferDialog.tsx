@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowRightLeft, ArrowDownRight } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { formatCurrency } from '@/lib/utils';
+import { motion } from 'framer-motion';
+import { useToast } from '@/components/ui/use-toast';
 
 interface TransferDialogProps {
   type: 'send' | 'receive';
@@ -17,44 +19,68 @@ interface TransferDialogProps {
 
 export default function TransferDialog({ type, accountId, trigger }: TransferDialogProps) {
   const { accounts, sendMoney } = useBank();
+  const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [fromAccount, setFromAccount] = useState(accountId || '');
   const [toAccount, setToAccount] = useState('');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
     const amountNum = parseFloat(amount);
     if (isNaN(amountNum) || amountNum <= 0) {
       setError('Please enter a valid amount');
+      setLoading(false);
       return;
     }
 
     if (!fromAccount || !toAccount) {
       setError('Please select both accounts');
+      setLoading(false);
       return;
     }
 
     if (fromAccount === toAccount) {
       setError('Cannot transfer to the same account');
+      setLoading(false);
       return;
     }
 
-    const fromAcc = accounts.find(a => a.id === fromAccount);
+    const fromAcc = accounts.find(a => (a.id || a._id) === fromAccount);
     if (fromAcc && fromAcc.balance < amountNum) {
       setError('Insufficient funds');
+      setLoading(false);
       return;
     }
 
-    sendMoney(fromAccount, toAccount, amountNum, description || 'Transfer');
-    setOpen(false);
-    setAmount('');
-    setDescription('');
-    setError('');
+    try {
+      await sendMoney(fromAccount, toAccount, amountNum, description || 'Transfer');
+      
+      toast({
+        title: "Transfer Initiated",
+        description: `$${amountNum.toFixed(2)} transfer request submitted successfully`,
+      });
+      
+      setOpen(false);
+      setAmount('');
+      setDescription('');
+      setError('');
+    } catch (err: any) {
+      setError(err.message || 'Failed to initiate transfer');
+      toast({
+        title: "Transfer Failed",
+        description: err.message || 'Failed to initiate transfer',
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -77,6 +103,11 @@ export default function TransferDialog({ type, accountId, trigger }: TransferDia
         )}
       </DialogTrigger>
       <DialogContent>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.2 }}
+        >
         <DialogHeader>
           <DialogTitle>{type === 'send' ? 'Send Money' : 'Receive Money'}</DialogTitle>
           <DialogDescription>
@@ -150,11 +181,16 @@ export default function TransferDialog({ type, accountId, trigger }: TransferDia
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-gradient-to-r from-blue-600 to-green-600">
-              {type === 'send' ? 'Send Money' : 'Request Money'}
+            <Button 
+              type="submit" 
+              className="bg-gradient-to-r from-green-700 to-emerald-600"
+              disabled={loading}
+            >
+              {loading ? 'Processing...' : type === 'send' ? 'Send Money' : 'Request Money'}
             </Button>
           </DialogFooter>
         </form>
+        </motion.div>
       </DialogContent>
     </Dialog>
   );

@@ -15,13 +15,15 @@ import {
   Sparkles,
   ChevronsLeft,
   ChevronsRight,
+  Trophy,
 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import { motion, AnimatePresence } from 'framer-motion';
+import Logo from '@/components/ui/Logo';
 
 export default function Sidebar() {
-  const { logout, user } = useAuth();
+  const { logout, user, isAdmin } = useAuth();
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
@@ -31,7 +33,8 @@ export default function Sidebar() {
     { icon: Home, label: 'Dashboard', path: '/dashboard' },
     { icon: CreditCard, label: 'Accounts', path: '/accounts' },
     { icon: TrendingUp, label: 'Analytics', path: '/analytics' },
-    { icon: Shield, label: 'Admin', path: '/admin' },
+    { icon: Trophy, label: 'Rewards', path: '/rewards' },
+    ...(isAdmin ? [{ icon: Shield, label: 'Admin', path: '/admin' }] : []),
     { icon: Settings, label: 'Settings', path: '/settings' },
   ];
 
@@ -43,21 +46,26 @@ export default function Sidebar() {
   const renderSidebarContent = (isCollapsed: boolean, showCollapseToggle = true) => (
     <div className={`flex h-full flex-col bg-background text-foreground ${isCollapsed ? 'items-center' : ''}`}>
       <div className="w-full border-b border-border p-5">
+        {!isCollapsed && (
+          <div className="mb-4">
+            <Logo size="md" />
+          </div>
+        )}
         <div
-          className={`rounded-xl bg-gradient-to-r from-blue-600/10 to-emerald-500/10 p-3 ${
+          className={`rounded-xl bg-gradient-to-r from-green-600/10 to-emerald-500/10 p-3 ${
             isCollapsed ? 'flex flex-col items-center text-center gap-2' : 'flex items-center gap-3 justify-between'
           }`}
         >
-          <div className="rounded-full bg-gradient-to-r from-blue-600 to-emerald-500 p-2">
+          <div className="rounded-full bg-gradient-to-r from-green-700 to-emerald-500 p-2">
             <User className="h-5 w-5 text-white" />
           </div>
           {!isCollapsed ? (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate">{user?.name || 'GlaBank user'}</p>
+              <p className="text-sm font-semibold truncate">{user?.name || 'GLA Bank user'}</p>
               <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
             </div>
           ) : (
-            <p className="text-xs font-medium text-muted-foreground">{user?.name || 'GlaBank user'}</p>
+            <p className="text-xs font-medium text-muted-foreground">{user?.name || 'GLA Bank user'}</p>
           )}
           <div className={isCollapsed ? '' : 'ml-2'}>
             <ThemeToggle />
