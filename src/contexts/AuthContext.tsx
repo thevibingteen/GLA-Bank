@@ -82,7 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return false;
     } catch (error: any) {
       console.error('Register error:', error);
-      return false;
+      // Re-throw the error so the UI can display the actual error message
+      throw error;
     }
   };
 

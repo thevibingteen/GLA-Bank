@@ -56,7 +56,20 @@ export default function RegisterPage() {
         window.location.href = '/dashboard';
       }
     } catch (err: any) {
-      setError(err.message || 'Registration failed. Please try again.');
+      console.error('Registration error:', err);
+      // Show the actual error message from the backend
+      const errorMessage = err?.message || 'Registration failed. Please try again.';
+      
+      // Check for common errors
+      if (errorMessage.includes('fetch') || errorMessage.includes('Failed to fetch')) {
+        setError('Cannot connect to server. Please make sure the backend is running on http://localhost:5000');
+      } else if (errorMessage.includes('User already exists')) {
+        setError('This email is already registered. Please use a different email or try logging in.');
+      } else if (errorMessage.includes('Password must be at least')) {
+        setError('Password must be at least 6 characters long.');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
