@@ -55,11 +55,17 @@ mongoose.connect(MONGODB_URI, {
   .then(() => {
     console.log('✅ Connected to MongoDB Atlas');
     console.log(`📦 Database: ${mongoose.connection.db?.databaseName || 'glabank'}`);
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
-      console.log(`📊 API Health: http://localhost:${PORT}/api/health`);
-      console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
-    });
+    
+    // Only start server if not in Vercel serverless environment
+    if (process.env.VERCEL !== '1') {
+      app.listen(PORT, () => {
+        console.log(`🚀 Server running on http://localhost:${PORT}`);
+        console.log(`📊 API Health: http://localhost:${PORT}/api/health`);
+        console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
+      });
+    } else {
+      console.log('🚀 Serverless function ready on Vercel');
+    }
   })
   .catch((error) => {
     console.error('❌ MongoDB connection error:', error.message);
@@ -67,7 +73,9 @@ mongoose.connect(MONGODB_URI, {
       console.error('💡 Tip: Check your IP whitelist in MongoDB Atlas');
       console.error('💡 Tip: Verify your connection string is correct');
     }
-    process.exit(1);
+    if (process.env.VERCEL !== '1') {
+      process.exit(1);
+    }
   });
 
 export default app;
