@@ -32,23 +32,31 @@ async function apiRequest<T>(
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
 
-  if (!response.ok) {
-    let errorMessage = 'An error occurred';
-    try {
-      const error = await response.json();
-      errorMessage = error.message || error.error || `HTTP error! status: ${response.status}`;
-    } catch {
-      errorMessage = `HTTP error! status: ${response.status}`;
+    if (!response.ok) {
+      let errorMessage = 'An error occurred';
+      try {
+        const error = await response.json();
+        errorMessage = error.message || error.error || `HTTP error! status: ${response.status}`;
+      } catch {
+        errorMessage = `HTTP error! status: ${response.status}`;
+      }
+      throw new Error(errorMessage);
     }
-    throw new Error(errorMessage);
-  }
 
-  return response.json();
+    return response.json();
+  } catch (error: any) {
+    // Handle network errors (backend not running, CORS, etc.)
+    if (error.name === 'TypeError' && (error.message.includes('fetch') || error.message.includes('Failed to fetch'))) {
+      throw new Error(`Cannot connect to server at ${API_BASE_URL}. Please make sure the backend is running on http://localhost:5000`);
+    }
+    throw error;
+  }
 }
 
 // Auth API
