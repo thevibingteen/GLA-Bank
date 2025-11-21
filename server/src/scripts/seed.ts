@@ -57,31 +57,51 @@ async function seed() {
       await testUser.save();
       console.log('✅ Created test user:', testEmail);
 
+      // Helper function to generate unique account number
+      const generateAccountNumber = () => {
+        return Math.floor(1000000000000000 + Math.random() * 9000000000000000).toString();
+      };
+
       // Create default accounts for test user
+      let accountNumber1 = generateAccountNumber();
+      while (await Account.findOne({ accountNumber: accountNumber1 })) {
+        accountNumber1 = generateAccountNumber();
+      }
       const account1 = new Account({
         userId: testUser._id,
         name: 'Primary Checking',
         type: 'checking',
         balance: 5000,
-        status: 'active'
+        status: 'active',
+        accountNumber: accountNumber1
       });
       await account1.save();
 
+      let accountNumber2 = generateAccountNumber();
+      while (await Account.findOne({ accountNumber: accountNumber2 })) {
+        accountNumber2 = generateAccountNumber();
+      }
       const account2 = new Account({
         userId: testUser._id,
         name: 'Savings Account',
         type: 'savings',
         balance: 10000,
-        status: 'active'
+        status: 'active',
+        accountNumber: accountNumber2
       });
       await account2.save();
 
+      let accountNumber3 = generateAccountNumber();
+      while (await Account.findOne({ accountNumber: accountNumber3 })) {
+        accountNumber3 = generateAccountNumber();
+      }
       const account3 = new Account({
         userId: testUser._id,
         name: 'Credit Card',
         type: 'credit',
         balance: 0,
-        status: 'active'
+        status: 'active',
+        accountNumber: accountNumber3
       });
       await account3.save();
       console.log('✅ Created default accounts for test user');

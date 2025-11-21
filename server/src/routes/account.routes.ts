@@ -41,12 +41,28 @@ router.post('/', authenticate, async (req: AuthRequest, res) => {
       return res.status(400).json({ message: 'Invalid account type' });
     }
 
+    // Generate account number before creating
+    const generateAccountNumber = () => {
+      return Math.floor(1000000000000000 + Math.random() * 9000000000000000).toString();
+    };
+
+    let accountNumber = generateAccountNumber();
+    // Ensure uniqueness (check if exists, regenerate if needed)
+    let existing = await Account.findOne({ accountNumber });
+    let attempts = 0;
+    while (existing && attempts < 10) {
+      accountNumber = generateAccountNumber();
+      existing = await Account.findOne({ accountNumber });
+      attempts++;
+    }
+
     const account = new Account({
       userId: req.userId,
       name,
       type,
       balance: initialBalance || 0,
-      status: 'active'
+      status: 'active',
+      accountNumber // Explicitly set accountNumber
     });
 
     await account.save();
