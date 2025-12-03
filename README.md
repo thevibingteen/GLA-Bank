@@ -165,9 +165,9 @@ Push and open a pull request 🚀
 
 🧑‍💻 Author
 
-Ketan Singh
+Suraj Singh
 🔗 Codeforces
 
 💼 LinkedIn
 
-📧 ketan@example.com
+
