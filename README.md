@@ -165,9 +165,9 @@ Push and open a pull request 🚀
 
 🧑‍💻 Author
 
-Ketan Singh
-Ankit Kumar
-Suraj Singh
+Ketan Singh <br>
+Ankit Kumar <br>
+Suraj Singh <br>
 
 
 
