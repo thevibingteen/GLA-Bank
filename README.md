@@ -98,6 +98,16 @@ cd client
 npm install
 npm start
 
+### One-command dev startup
+You can start local in-memory DB, backend, and frontend together using a single command (Windows PowerShell):
+
+```powershell
+# From the project root
+npm.cmd run dev:all
+```
+
+This command runs an in-memory MongoDB (via `mongodb-memory-server`), the backend (tsx watch), and the Vite dev server concurrently.
+
 
 Access the app
 Visit 👉 http://localhost:3000
